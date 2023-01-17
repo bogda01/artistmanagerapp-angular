@@ -3,6 +3,9 @@ import { Artist } from './artist';
 import { ArtistService } from './artist.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
+import {SongService} from './song.service';
+import {Song} from './song';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-root',
@@ -12,10 +15,12 @@ import { NgForm } from '@angular/forms';
 export class AppComponent implements OnInit {
   title = 'artistmanagerapp-angular';
   public artists: Artist[];
+  public songs: Song[];
+  public songArtist: Artist;
   public editArtist: Artist;
   public deleteArtist: Artist;
 
-  constructor(private artistService: ArtistService){}
+  constructor(private artistService: ArtistService, private songService: SongService){}
 
   ngOnInit() {
     this.getArtists();
@@ -26,6 +31,18 @@ export class AppComponent implements OnInit {
       (response: Artist[]) => {
         this.artists = response;
         console.log(this.artists);
+      },
+      (error: HttpErrorResponse) => {
+        alert(error.message);
+      }
+    );
+  }
+
+  public onGetSongs(artistId: number): void {
+    this.songService.getSongs(artistId).subscribe(
+      (response: Song[]) => {
+        this.songs = response;
+        console.log(this.songs);
       },
       (error: HttpErrorResponse) => {
         alert(error.message);
@@ -104,10 +121,14 @@ export class AppComponent implements OnInit {
       this.deleteArtist = artist;
       button.setAttribute('data-target', '#deleteArtistModal');
     }
+    if (mode === 'song') {
+      this.songArtist = artist;
+      this.onGetSongs(this.songArtist.id);
+      button.setAttribute('data-target', '#songModal');
+    }
     container.appendChild(button);
     button.click();
   }
-
 
 
 }
